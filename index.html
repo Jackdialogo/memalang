@@ -199,4 +199,41 @@
         document.getElementById('matedRabbit').value = data.matedRabbit || '';
         document.getElementById('pregnancyStart').value = data.pregnancyStart || '';
         document.getElementById('dueDate').value = data.dueDate || '';
-        document.querySelector(`input[name="foodIntake"][value="${data
+        document.querySelector(`input[name="foodIntake"][value="${data.foodIntake || 'normal'}"]`).checked = true;
+        document.querySelector(`input[name="mating"][value="${data.mating || 'no'}"]`).checked = true;
+        document.getElementById('note').value = data.note || '';
+    }
+
+    // Update the cage list from Firestore
+    async function updateCageList() {
+        const cageButtonsDiv = document.getElementById('cageButtons');
+        cageButtonsDiv.innerHTML = ''; // Clear existing buttons
+
+        const snapshot = await db.collection('rabbitCages').get();
+        snapshot.forEach(doc => {
+            const cageNumber = doc.id;
+            const button = document.createElement('button');
+            button.innerText = `CAGE ${cageNumber}`;
+            button.onclick = () => showCageDetails(cageNumber);
+            cageButtonsDiv.appendChild(button);
+        });
+    }
+
+    // Delete a cage from Firestore
+    async function deleteCage() {
+        const cageNumber = document.getElementById('rabbitForm').dataset.cageNumber; // Get the current cage number
+        if (confirm(`Are you sure you want to delete Cage ${cageNumber}?`)) {
+            await db.collection('rabbitCages').doc(cageNumber).delete(); // Remove from Firestore
+            alert(`Cage ${cageNumber} deleted successfully!`);
+            updateCageList(); // Refresh the cage list
+            goHome(); // Go back to home
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('rabbitForm').reset(); // Reset the form fields
+        togglePregnancy(false); // Hide pregnancy options
+    }
+</script>
+</body>
+</html>
